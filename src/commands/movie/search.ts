@@ -36,6 +36,7 @@ export default {
       )
       .setTimestamp()
       .setFooter({ text: 'Movie Bot', iconURL: 'https://i.imgur.com/wSTFkRM.png' });
+      
     await interaction.reply({ embeds: [embed] });
   }
 }
