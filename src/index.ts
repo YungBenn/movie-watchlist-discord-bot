@@ -1,7 +1,42 @@
-import { Elysia } from "elysia";
+import { Client, GatewayIntentBits, Partials, Collection, Events } from "discord.js";
+import { readdir } from "node:fs/promises";
+import { join } from "node:path";
+import { env } from "./utils/env";
 
-const app = new Elysia().get("/", () => "Hello Elysia").listen(3000);
+declare module 'discord.js' {
+  interface Client {
+    commands: Collection<string, any>
+    // buttons: Collection<string, any>
+    // error: typeof import('./handler/error.js').default
+    // achievements: typeof import('./handler/achievements.js').default
+  }
+}
 
-console.log(
-  `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`
-);
+const client = new Client({ intents: [GatewayIntentBits.Guilds], partials: [Partials.Reaction] })
+
+client.commands = new Collection()
+
+const commands: any = []
+const commandFiles = await readdir(join(__dirname, './commands'))
+for (const folders of commandFiles) {
+  const folder = await readdir(join(__dirname, `./commands/${folders}`))
+  for (const file of folder) {
+    const command = (await import(`./commands/${folders}/${file}`)).default
+    client.commands.set(command.data.name, command)
+    commands.push(command.data.toJSON())
+  }
+}
+
+const eventFiles = await readdir(join(__dirname, './events'))
+for (const file of eventFiles) {
+  const event = (await import(`./events/${file}`)).default
+  client.on(event.name, (...args) => event.execute(...args))
+}
+
+client.on(Events.ClientReady, async (c) => {
+  console.log(`Ready! Logged as ${c.user.tag}`);
+  await client.guilds.cache.get(env.guildID)?.commands.set(commands)
+  await client.application?.commands.set(commands)
+})
+
+await client.login(env.discordToken)
