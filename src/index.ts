@@ -34,7 +34,6 @@ for (const file of eventFiles) {
 }
 
 client.on(Events.ClientReady, async (c) => {
-  console.log(`Ready! Logged as ${c.user.tag}`);
   await client.guilds.cache.get(env.guildID)?.commands.set(commands)
   await client.application?.commands.set(commands)
 })

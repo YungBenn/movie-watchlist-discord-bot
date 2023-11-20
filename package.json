@@ -5,7 +5,8 @@
   "scripts": {
     "start": "bun run dist/index.js",
     "dev": "bun run --watch src/index.ts",
-    "build": "bun build --target=bun src/index.ts --outdir dist"
+    "build": "bun build --target=bun src/index.ts --outdir dist",
+    "clean": "rm -rf dist && echo 'Done.'"
   },
   "devDependencies": {
     "bun-types": "latest"
