@@ -3,8 +3,10 @@
   "module": "src/index.ts",
   "type": "module",
   "scripts": {
-    "start": "bun run dist/index.js",
-    "dev": "bun run --watch src/index.ts",
+    "start": "NODE_ENV=production bun run dist/index.js",
+    "dev": "NODE_ENV=development bun run --watch src/index.ts",
+    "start-local": "NODE_ENV=production bun run dist/index.js",
+    "dev-local": "NODE_ENV=development bun run --watch src/index.ts",
     "build": "bun build --target=bun src/index.ts --outdir dist",
     "clean": "rm -rf dist && echo 'Done.'"
   },
@@ -15,6 +17,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "discord.js": "^14.14.1"
+    "discord.js": "^14.14.1",
+    "mongoose": "^8.0.1"
   }
 }

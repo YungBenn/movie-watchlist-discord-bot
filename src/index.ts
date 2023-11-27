@@ -1,7 +1,7 @@
 import { Client, GatewayIntentBits, Partials, Collection, Events } from "discord.js";
-import { readdir } from "node:fs/promises";
-import { join } from "node:path";
 import { env } from "./utils/env";
+import { loadFolder } from "./utils/helper";
+import connectDB from "./db/connect";
 
 declare module 'discord.js' {
   interface Client {
@@ -16,26 +16,13 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds], partials: [Part
 
 client.commands = new Collection()
 
-const commands: any = []
-const commandFiles = await readdir(join(__dirname, './commands'))
-for (const folders of commandFiles) {
-  const folder = await readdir(join(__dirname, `./commands/${folders}`))
-  for (const file of folder) {
-    const command = (await import(`./commands/${folders}/${file}`)).default
-    client.commands.set(command.data.name, command)
-    commands.push(command.data.toJSON())
-  }
-}
-
-const eventFiles = await readdir(join(__dirname, './events'))
-for (const file of eventFiles) {
-  const event = (await import(`./events/${file}`)).default
-  client.on(event.name, (...args) => event.execute(...args))
-}
+const commands = await loadFolder(client, 'commands')
+await loadFolder(client, 'events')
 
 client.on(Events.ClientReady, async (c) => {
   await client.guilds.cache.get(env.guildID)?.commands.set(commands)
   await client.application?.commands.set(commands)
 })
 
+await connectDB(env)
 await client.login(env.discordToken)
